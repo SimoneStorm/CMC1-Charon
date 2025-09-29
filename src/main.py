@@ -1,5 +1,5 @@
 # main.py
-from charon_parser_2 import parse_code
+from charon_parser_AST import parse_code
 
 EXAMPLE = """
 var x : Boolean;
