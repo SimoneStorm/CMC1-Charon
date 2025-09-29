@@ -1,54 +1,59 @@
+# charon_ast.py
 from dataclasses import dataclass
-from typing import List, Optional, Any
+from typing import Any
+
+# ---- Program / statements ----
 
 @dataclass
-class Node:
-    pass
+class Program:
+    items: list  # VarDecl or Stmt
 
 @dataclass
-class Program(Node):
-    items: List[Any]  # VarDecl or Stmt
-
-@dataclass
-class VarDecl(Node):
+class VarDecl:
     name: str
-    type_name: str
+    type_name: str  # "Boolean" or "Char"
 
 @dataclass
-class Assign(Node):
+class Assign:
     name: str
     expr: Any
 
 @dataclass
-class Print(Node):
+class Print:
     expr: Any
 
 @dataclass
-class If(Node):
+class If:
     cond: Any
-    then_branch: List[Any]
-    else_branch: List[Any]
+    then_branch: list  # list of statements/expr-stmts
+    else_branch: list  # list of statements/expr-stmts
 
 @dataclass
-class While(Node):
+class While:
     cond: Any
-    body: List[Any]
+    body: list
 
-# Expr nodes
+# ---- Expressions ----
+
 @dataclass
-class Ident(Node):
+class Ident:
     name: str
 
 @dataclass
-class BoolLit(Node):
+class BoolLit:
     value: bool
 
 @dataclass
-class CharLit(Node):
-    value: str
+class CharLit:
+    value: str  # you can store the raw "'A'" literal or unescape to "A"
 
 @dataclass
-class Binary(Node):
-    op: str
+class Call:
+    name: str
+    arg: Any
+
+@dataclass
+class Binary:
+    op: str      # "or","and","=","<","<=",">",">=","+"
     left: Any
     right: Any
