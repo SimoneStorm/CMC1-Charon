@@ -1,4 +1,3 @@
-# charon_ast.py
 from dataclasses import dataclass
 from typing import Any
 
@@ -45,7 +44,7 @@ class BoolLit:
 
 @dataclass
 class CharLit:
-    value: str  # you can store the raw "'A'" literal or unescape to "A"
+    value: str  
 
 @dataclass
 class Call:
