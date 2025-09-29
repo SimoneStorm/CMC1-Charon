@@ -1,5 +1,5 @@
-from parser import parse_code
-from ast import Program
+from charon_parser import parse_code
+from charon_ast import Program
 import sys, json
 
 EXAMPLE = """
@@ -10,7 +10,7 @@ print(x);
 
 if __name__ == "__main__":
     prog = parse_code(EXAMPLE)
-    # simple pretty-print of AST
+    
     import ast as pyast
     from ast import *
     def pretty(node, indent=0):

@@ -1,3 +1,4 @@
+# Translator from a messy string of characters → a clean, typed list of tokens for the parser.
 import re
 from dataclasses import dataclass
 from typing import List
@@ -63,8 +64,11 @@ def lex(code: str) -> List[Token]:
         else:
             col += len(txt)
         pos = m.end()
-        if kind in ("WHITESPACE","COMMENT"):
+
+        # Skip whitespace and comments
+        if kind in ("WHITESPACE","COMMENT"): 
             continue
+        # Handle identifiers and keywords
         if kind == "IDENT":
             mapped = KEYWORDS.get(txt)
             if mapped:
@@ -79,5 +83,7 @@ def lex(code: str) -> List[Token]:
             tokens.append(Token("UNKNOWN", txt, token_line, token_col, start))
             continue
         tokens.append(Token(kind, txt, token_line, token_col, start))
-    tokens.append(Token("EOF","",line,col,pos))
+
+
+    tokens.append(Token("EOF","",line,col,pos)) # End-of-file token so parser knows when to stop
     return tokens
