@@ -18,9 +18,9 @@ while x do
 end;
 """
 
-def pretty(node, indent=0):
-    pad = "  " * indent
-    if node is None:
+def Tree(node, indent=0): 
+    pad = "  " * indent 
+    if node is None: 
         return pad + "None\n"
     if hasattr(node, "__dict__"):
         s = pad + node.__class__.__name__ + "\n"
@@ -28,10 +28,10 @@ def pretty(node, indent=0):
             if isinstance(v, list):
                 s += pad + f"  {k}:\n"
                 for it in v:
-                    s += pretty(it, indent + 2)
+                    s += Tree(it, indent + 2)
             else:
                 if hasattr(v, "__dict__"):
-                    s += pad + f"  {k}:\n" + pretty(v, indent + 2)
+                    s += pad + f"  {k}:\n" + Tree(v, indent + 2)
                 else:
                     s += pad + f"  {k}: {repr(v)}\n"
         return s
@@ -39,5 +39,5 @@ def pretty(node, indent=0):
 
 if __name__ == "__main__":
     ast = parse_code(EXAMPLE)
-    print(pretty(ast))
+    print(Tree(ast))
 
