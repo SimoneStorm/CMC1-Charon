@@ -1,5 +1,7 @@
 from charon_parser_AST import parse_code
 from charon_context_checker import ContextChecker
+from charon_runner import Runner
+
 
 EXAMPLE = """
 method Cat()
@@ -26,3 +28,14 @@ if __name__ == "__main__":
     print("\nRunning context checker...")
     checker = ContextChecker()
     checker.check_program(program_ast)
+
+    print("Parsing program...")
+    program_ast = parse_code(EXAMPLE)
+
+    print("\nRunning context checker...")
+    checker = ContextChecker()
+    checker.check_program(program_ast)
+
+    print("\nExecuting program...")
+    runner = Runner()
+    runner.run_program(program_ast)
