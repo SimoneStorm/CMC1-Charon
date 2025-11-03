@@ -24,8 +24,8 @@ class Print:
 @dataclass
 class If:
     cond: Any
-    then_branch: list  # list of statements/expr-stmts
-    else_branch: list  # list of statements/expr-stmts
+    then_branch: list
+    else_branch: list
 
 @dataclass
 class While:
@@ -53,6 +53,38 @@ class Call:
 
 @dataclass
 class Binary:
-    op: str      # "or","and","=","<","<=",">",">=","+"
+    op: str     
     left: Any
     right: Any
+
+@dataclass
+class ArrayType:
+    def __init__(self, size, elem_type):
+        self.size = size
+        self.elem_type = elem_type
+
+@dataclass
+class ArrayAccess:
+    def __init__(self, name, index_expr):
+        self.name = name
+        self.index_expr = index_expr
+
+@dataclass
+class IntLit:
+    def __init__(self, value):
+        self.value = value
+
+    def __repr__(self):
+        return f"IntLit({self.value})"
+
+
+@dataclass
+class MethodDecl:
+    def __init__(self, name, body):
+        self.name = name
+        self.body = body  
+
+@dataclass
+class MethodCall:
+    def __init__(self, name):
+        self.name = name

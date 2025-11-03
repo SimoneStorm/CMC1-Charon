@@ -2,21 +2,22 @@ from charon_parser_AST import parse_code
 from charon_context_checker import ContextChecker
 
 EXAMPLE = """
-var x : Boolean;
-var c : Char;
-x := True;
-c := 'A';
-
-if x and (c = 'A' or True) then
-    print(c);
-else
-    c := c + 'B';
+method Cat()
+    print("Cat is running");
+    Dog();
 end;
 
-while x do
-    print(c);
+method Dog()
+    print("Dog says woof");
 end;
+
+var MyArray : array[5] of Char;
+MyArray[1] := "A";
+print(MyArray[1]);
+
+Cat();
 """
+
 
 if __name__ == "__main__":
     print("Parsing program...")

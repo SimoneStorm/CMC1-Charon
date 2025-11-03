@@ -34,7 +34,10 @@ class Parser:
     def parse_program(self):
         items = []
         while self.peek().type != "EOF":
-            if self.peek().type == "VAR":
+            # ---- METHOD SUPPORT ----
+            if self.peek().type == "METHOD":
+                items.append(self.parse_method_decl())
+            elif self.peek().type == "VAR":
                 items.append(self.parse_vardecl())
             else:
                 items.append(self.parse_statement())
@@ -44,17 +47,43 @@ class Parser:
         self.expect("VAR")
         name = self.expect("IDENT").value
         self.expect("COLON")
-        tkn = self.expect("BOOLEAN", "CHAR")
+
+        # ---- ARRAY SUPPORT ----
+        if self.accept("ARRAY"):
+            self.expect("LBRACKET")
+            size_token = self.expect("INT_LIT")
+            self.expect("RBRACKET")
+            self.expect("OF")
+            elem_type = self.expect("BOOLEAN", "CHAR").value
+            var_type = ArrayType(int(size_token.value), elem_type)
+        else:
+            tkn = self.expect("BOOLEAN", "CHAR")
+            var_type = tkn.value
+
         self.expect("SEMICOLON")
-        return VarDecl(name, tkn.value)
+        return VarDecl(name, var_type)
+
+    # ---- METHOD DECLARATION ----
+    def parse_method_decl(self):
+        self.expect("METHOD")
+        name = self.expect("IDENT").value
+        self.expect("LPAREN")
+        self.expect("RPAREN")
+        body = []
+        while self.peek().type not in ("END", "EOF"):
+            body.append(self.parse_statement())
+        self.expect("END")
+        self.expect("SEMICOLON")
+        return MethodDecl(name, body)
 
     # ---------- statements ----------
     def parse_statement(self):
         tok = self.peek()
 
-        # IDENT := ...
-        if tok.type == "IDENT" and self.tokens[self.pos + 1].type == "ASSIGN":
-            return self.parse_assign()
+        if tok.type == "IDENT":
+            next_tok = self.tokens[self.pos + 1]
+            if next_tok.type in ("ASSIGN", "LBRACKET"):
+                return self.parse_assign()
 
         if tok.type == "PRINT":
             return self.parse_print()
@@ -65,18 +94,25 @@ class Parser:
         if tok.type == "WHILE":
             return self.parse_while()
 
-        # Fallback: expression statement (ExprStmt)
-        # We don’t have a separate ExprStmt node; we return the expr directly.
+
         expr = self.parse_expr()
         self.expect("SEMICOLON")
         return expr
 
     def parse_assign(self):
         name = self.expect("IDENT").value
+        if self.accept("LBRACKET"):
+            index_expr = self.parse_expr()
+            self.expect("RBRACKET")
+            left = ArrayAccess(name, index_expr)
+        else:
+            left = name
+
         self.expect("ASSIGN")
         expr = self.parse_expr()
         self.expect("SEMICOLON")
-        return Assign(name, expr)
+        return Assign(left, expr)
+
 
     def parse_print(self):
         self.expect("PRINT")
@@ -116,7 +152,6 @@ class Parser:
     def parse_expr(self):
         return self.parse_or()
 
-    # or: left-associative
     def parse_or(self):
         left = self.parse_and()
         while self.accept("OR"):
@@ -124,7 +159,6 @@ class Parser:
             left = Binary("or", left, right)
         return left
 
-    # and: left-associative
     def parse_and(self):
         left = self.parse_rel()
         while self.accept("AND"):
@@ -132,7 +166,6 @@ class Parser:
             left = Binary("and", left, right)
         return left
 
-    # relational: NON-associative (no chaining like a < b < c)
     def parse_rel(self):
         left = self.parse_add()
         t = self.peek()
@@ -142,7 +175,6 @@ class Parser:
             return Binary(op, left, right)
         return left
 
-    # + : left-associative
     def parse_add(self):
         left = self.parse_primary()
         while self.accept("PLUS"):
@@ -155,16 +187,25 @@ class Parser:
 
         if t.type == "IDENT":
             name = self.advance().value
-            # optional single-arg Call: name '(' Expr ')'
+            
+       
+            if self.accept("LBRACKET"):
+                index_expr = self.parse_expr()
+                self.expect("RBRACKET")
+                return ArrayAccess(name, index_expr)
+
             if self.accept("LPAREN"):
-                arg = self.parse_expr()
                 self.expect("RPAREN")
-                return Call(name, arg)
+                return MethodCall(name)
             return Ident(name)
 
         if t.type == "CHAR_LIT":
             self.advance()
             return CharLit(t.value)
+
+        if t.type == "INT_LIT":
+            self.advance()
+            return IntLit(int(t.value))
 
         if t.type == "TRUE":
             self.advance()

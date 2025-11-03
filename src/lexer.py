@@ -20,7 +20,8 @@ TOKEN_SPEC = [
     ("ASSIGN",     r":="),
     ("LE",         r"<="),
     ("GE",         r">="),
-    ("CHAR_LIT",   r"'([^'\\]|\\.)'"),
+    ("CHAR_LIT",   r'"[^"\n]*"|\'[^\'\n]*\''),
+    ("INT_LIT",    r"[0-9]+"),
     ("IDENT",      r"[A-Za-z_][A-Za-z0-9_]*"),
     ("EQ",         r"="),
     ("LT",         r"<"),
@@ -31,8 +32,12 @@ TOKEN_SPEC = [
     ("LPAREN",     r"\("),
     ("RPAREN",     r"\)"),
     ("COMMA",      r","),
+    ("LBRACKET",   r"\["),
+    ("RBRACKET",   r"\]"),
     ("UNKNOWN",    r"."),
 ]
+
+
 
 MASTER = re.compile("|".join(f"(?P<{n}>{p})" for n, p in TOKEN_SPEC))
 
@@ -40,7 +45,8 @@ KEYWORDS = {
     "var":"VAR", "if":"IF", "then":"THEN", "else":"ELSE", "end":"END",
     "while":"WHILE","do":"DO","print":"PRINT",
     "Boolean":"BOOLEAN","Char":"CHAR","True":"TRUE","False":"FALSE",
-    "or":"OR","and":"AND", "return":"RETURN", "func":"FUNC"
+    "or":"OR","and":"AND", "return":"RETURN", "func":"FUNC", "array":"ARRAY", "of":"OF", "method":"METHOD"
+
 }
 
 def lex(code: str) -> List[Token]:
@@ -87,3 +93,10 @@ def lex(code: str) -> List[Token]:
 
     tokens.append(Token("EOF","",line,col,pos)) # End-of-file token so parser knows when to stop
     return tokens
+
+
+# Test code
+if __name__ == "__main__":
+    code = 'print("Cat is running");'
+    for t in lex(code):
+        print(t)
