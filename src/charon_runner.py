@@ -14,7 +14,6 @@ class Runner:
             if isinstance(item, VarDecl):
                 if isinstance(item.type_name, ArrayType):
                     size = item.type_name.size
-                    # Pre-fill array with None values
                     self.vars[item.name] = [None for _ in range(size)]
                 else:
                     self.vars[item.name] = None
