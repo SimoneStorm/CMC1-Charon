@@ -40,7 +40,7 @@ TOKEN_SPEC = [
 ]
 
 
-# merges all token patterns into one big regex
+# merges all token patterns into one big regex/dictionary
 MASTER = re.compile("|".join(f"(?P<{n}>{p})" for n, p in TOKEN_SPEC))
 
 # Special words that have meaning in my language
@@ -52,22 +52,23 @@ KEYWORDS = {
 
 }
 
-
+# takes the raw source code string (like "var x := 4711;") and turns it into a list of Token objects, one for each recognized symbol in the language
 def scan(code: str) -> List[Token]:
     tokens = []
     line = 1
     col = 1
     pos = 0
     #This iterates over every regex match in the code string, in order.
-    for m in MASTER.finditer(code):
+    for m in MASTER.finditer(code): # The finditer() function walks through the entire input string and returns one match object per token.”
         kind = m.lastgroup
         txt = m.group()
         start = m.start()
+        #Error check (If the starting post isnt the same as where we left of, it means there is an error)
         if start != pos:
-            # Should not happen if regex covers all characters
             gap = code[pos:start]
             raise RuntimeError(f"Lexer gap at {pos}: {gap!r}")
         token_line, token_col = line, col
+        # Update line and column counter
         if "\n" in txt:
             parts = txt.split("\n")
             line += len(parts)-1
@@ -79,7 +80,13 @@ def scan(code: str) -> List[Token]:
         # Skip whitespace and comments
         if kind in ("WHITESPACE","COMMENT"): 
             continue
+            
         # Handle identifiers and keywords
+
+        #All words that look like identifiers are checked against a keyword table.
+        #If the word matches a reserved keyword like if or while, the token type is changed.
+        #If not, its treated as a normal identifier, such as a variable name
+
         if kind == "IDENT":
             mapped = KEYWORDS.get(txt)
             if mapped:
