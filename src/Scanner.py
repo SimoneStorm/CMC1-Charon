@@ -1,11 +1,12 @@
-# Translator from a messy string of characters → a clean, typed list of tokens for the parser.
+# The Scanner cleans up the raw input; The first step
 import re
 from dataclasses import dataclass
 from typing import List
 
+#Defines what a token is
 @dataclass
 class Token:
-    type: str
+    type: str #What kind of token it is (Assign, if osv)
     value: str
     line: int
     col: int
@@ -14,11 +15,12 @@ class Token:
     def __repr__(self):
         return f"{self.type}({self.value!r}, l={self.line}, c={self.col})"
 
+#List of token types that explains what they look like
 TOKEN_SPEC = [
-    ("COMMENT",    r"//[^\n]*"),
+    ("COMMENT",    r"//[^\n]*"), #Starts with // continue until new line
     ("WHITESPACE", r"[ \t\r\n]+"),
-    ("ASSIGN",     r":="),
-    ("LE",         r"<="),
+    ("ASSIGN",     r":="), #Assignment operator
+    ("LE",         r"<="), #Less Than or equal
     ("GE",         r">="),
     ("CHAR_LIT",   r'"[^"\n]*"|\'[^\'\n]*\''),
     ("INT_LIT",    r"[0-9]+"),
@@ -38,9 +40,10 @@ TOKEN_SPEC = [
 ]
 
 
-
+# merges all token patterns into one big regex
 MASTER = re.compile("|".join(f"(?P<{n}>{p})" for n, p in TOKEN_SPEC))
 
+# Special words that have meaning in my language
 KEYWORDS = {
     "var":"VAR", "if":"IF", "then":"THEN", "else":"ELSE", "end":"END",
     "while":"WHILE","do":"DO","print":"PRINT",
@@ -49,11 +52,13 @@ KEYWORDS = {
 
 }
 
-def lex(code: str) -> List[Token]:
+
+def scan(code: str) -> List[Token]:
     tokens = []
     line = 1
     col = 1
     pos = 0
+    #This iterates over every regex match in the code string, in order.
     for m in MASTER.finditer(code):
         kind = m.lastgroup
         txt = m.group()
