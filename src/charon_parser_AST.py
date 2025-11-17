@@ -1,5 +1,5 @@
 # Parser from a list of tokens → an AST (abstract syntax tree).
-from lexer import lex
+from Scanner import scan
 from charon_ast import *
 
 class ParseError(Exception):
@@ -225,6 +225,6 @@ class Parser:
 
 
 def parse_code(code: str):
-    tokens = lex(code)
+    tokens = scan(code)
     p = Parser(tokens)
     return p.parse_program()
